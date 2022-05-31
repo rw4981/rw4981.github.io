@@ -1,0 +1,573 @@
+<body></body><script>
+
+var SPHERE_RESOLUTION = 512;
+
+var COLOUR_ARRAY = [[255,255,255],[0,64,182],[98,98,98]];
+//Gold = 255,215,0
+//Royal Purple = 120,81,169
+//Royal Blue = 17,30,108
+//Blue = 0,64,182
+
+var ENABLE_BACKGROUND_IMAGE = 0;
+var ENABLE_TRANSPARENCY = 0;
+var ENABLE_CAMERA_LIGHT = 1;
+var ENABLE_OUTLINE = 0;
+
+var BACKGROUND_COLOR = '#115';
+var OUTLINE_WIDTH = 100/5;
+var OUTLINE_COLOR = '#000';
+var TRANSPARENCY_LEVEL = .7;
+
+var particle = [];
+
+var nowUpdate = new Date();
+var lastUpdate = new Date();
+var lastSec = new Date();
+var timeDiff = 0;
+var fps = 0;
+var frameCount = 0;
+
+document.body.style.background = '#000';
+
+var background;
+var backgroundReady = false;
+if(ENABLE_BACKGROUND_IMAGE) {
+	background = new Image();
+	background.src = 'ns.jpg';
+	background.onload = () => {
+		backgroundReady = true;
+	}
+}
+
+var PI2 = Math.PI * 2;
+var PID2 = Math.PI / 2;
+var SPHERE_RESOLUTION_DIV2 = SPHERE_RESOLUTION / 2;
+var CWD2 = 0;
+var CHD2 = 0;
+
+function createScrapCanvas(e,e2) {
+	e.width = SPHERE_RESOLUTION;
+	e.height = SPHERE_RESOLUTION;
+}
+
+var backCvs = document.createElement('canvas');
+var backCtx = backCvs.getContext('2d');
+document.body.appendChild(backCvs);
+backCvs.style.position = 'absolute';
+
+var cvs = document.createElement('canvas');
+var ctx = cvs.getContext('2d');
+document.body.appendChild(cvs);
+cvs.style.position = 'absolute';
+
+var baseCvs = document.createElement('canvas');
+var baseCtx = baseCvs.getContext('2d');
+createScrapCanvas(baseCvs, baseCtx);
+
+let gxr=0;
+let gyr=0;
+let gzr=0;
+
+function calcAngle(xc, yc) {
+
+	let slope = yc/xc;
+	let angle;
+	
+	if( xc > 0 ) angle = Math.atan(slope);
+	else angle = Math.atan(slope) + Math.PI;
+	
+	if( angle < 0 ) angle = angle + PI2;
+	
+	return angle - PID2;
+}
+
+
+//remember to square everything calculated against this
+//saves time processing square root
+function calcDist(x1,y1,z1,x2,y2,z2) {
+
+	let a1 = y1 - y2;
+	let b1 = x1 - x2;
+	let c1 = z1 - z2;
+	a1 *= a1;
+	b1 *= b1;
+	c1 *= c1;
+	return a1 + b1 + c1;
+}
+
+(function calcBaseParticle() {
+
+	if(!ENABLE_CAMERA_LIGHT) {
+		baseCtx.fillStyle = '#888888';
+		baseCtx.beginPath();
+		baseCtx.arc(SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION/2.025-baseCtx.lineWidth,0,PI2);
+		baseCtx.closePath();
+		baseCtx.fill();
+	}
+	
+	else {
+		for(let y = -SPHERE_RESOLUTION_DIV2; y < SPHERE_RESOLUTION/2; y++) {
+			for(let x = -SPHERE_RESOLUTION_DIV2; x < SPHERE_RESOLUTION_DIV2; x++) {
+//				let ocz = 2.26; //32 resolution
+//				let ocz = 2.23; //1024 resolution
+				let ocz = 2.228; //256 resolution
+				let xdsr = x/SPHERE_RESOLUTION;
+				let ydsr = y/SPHERE_RESOLUTION;
+				let xdsrxxdsr = xdsr * xdsr;
+				let ydsrxydsr = ydsr * ydsr;
+				let a = xdsrxxdsr + ydsrxydsr + 1;
+				let b = 2 * ocz;
+				let c = ocz*ocz - 1;
+				let disc = b*b - 4*a*c;
+				if(disc > 0) {
+					let r = Math.round(disc*30);
+					r = r.toString(16);
+					if(r.length === 1) r='0'+r;
+					baseCtx.fillStyle = '#'+r+r+r;
+					baseCtx.fillRect(SPHERE_RESOLUTION_DIV2+x,SPHERE_RESOLUTION_DIV2+y,
+						1,1);
+				}
+			}
+		}
+	}
+	
+	if(ENABLE_OUTLINE) drawOutline(baseCtx);
+
+	//fractal code
+	//one iteration
+	const iterations = 3;
+	for(let j=0; j<iterations; j++) {
+	
+		let newCvs = document.createElement('canvas');
+		let newCtx = newCvs.getContext('2d');
+		newCvs.width = SPHERE_RESOLUTION;
+		newCvs.height = SPHERE_RESOLUTION;
+		newCtx.drawImage(baseCvs,0,0,SPHERE_RESOLUTION,SPHERE_RESOLUTION);
+	
+		const numSpheres = 7;
+		for(let i=0; i < numSpheres; i++) {
+
+			let xrot = i/numSpheres*PI2;
+			let yrot = i/numSpheres*PI2;
+			let xpos = (( Math.cos(xrot) - Math.sin(yrot) )) * SPHERE_RESOLUTION/5 - SPHERE_RESOLUTION/numSpheres/2;
+			let ypos = (( Math.sin(xrot) + Math.cos(yrot) )) * SPHERE_RESOLUTION/5 - SPHERE_RESOLUTION/numSpheres/2;
+		
+			baseCtx.drawImage(newCvs,xpos+SPHERE_RESOLUTION/2-SPHERE_RESOLUTION/numSpheres/3.2,
+				ypos+SPHERE_RESOLUTION/2-SPHERE_RESOLUTION/numSpheres/3.2,
+				SPHERE_RESOLUTION/numSpheres*1.6,SPHERE_RESOLUTION/numSpheres*1.6);
+		}
+	
+		//draw center
+		baseCtx.drawImage(newCvs,SPHERE_RESOLUTION/2-SPHERE_RESOLUTION/numSpheres*.8,
+			SPHERE_RESOLUTION/2-SPHERE_RESOLUTION/numSpheres*.8,SPHERE_RESOLUTION/numSpheres*1.6,SPHERE_RESOLUTION/numSpheres*1.6);
+	}
+	
+})();
+
+function drawOutline(ctxa) {
+
+	ctxa.globalCompositeOperation = 'source-over';
+	ctxa.strokeStyle = OUTLINE_COLOR;
+	ctxa.lineWidth = SPHERE_RESOLUTION / OUTLINE_WIDTH;
+	ctxa.beginPath();
+	ctxa.arc(SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION/2.025-ctxa.lineWidth/2, 0, PI2);
+	ctxa.closePath();
+	ctxa.stroke();
+}
+
+var caccvs = [];
+var cacctx = [];
+(function createColourCanvases() {
+
+	for(let i = 0; i < COLOUR_ARRAY.length; i++) {
+
+		caccvs[i] = document.createElement('canvas');
+		cacctx[i] = caccvs[i].getContext('2d');
+		caccvs[i].width = SPHERE_RESOLUTION;
+		caccvs[i].height = SPHERE_RESOLUTION;
+
+		//colour math
+		let red = COLOUR_ARRAY[i][0].toString(16);
+		let green = COLOUR_ARRAY[i][1].toString(16);
+		let blue = COLOUR_ARRAY[i][2].toString(16);
+		if(red.length===1) red = '0'+red;
+		if(green.length===1) green = '0'+green;
+		if(blue.length===1) blue = '0'+blue;
+		let colour = '#'+red+green+blue;
+
+		//change color
+		cacctx[i].drawImage(baseCvs, 0, 0, SPHERE_RESOLUTION, SPHERE_RESOLUTION);
+		cacctx[i].globalCompositeOperation = 'overlay';
+		cacctx[i].fillStyle = colour;
+		cacctx[i].beginPath();
+		cacctx[i].arc(SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION_DIV2, SPHERE_RESOLUTION_DIV2, 0, PI2);
+		cacctx[i].closePath();
+		cacctx[i].fill();
+	}	
+})();
+
+var Particle = function(x,y,z,rad) {
+
+	this.radius = rad;
+	
+	this.x = x;
+	this.y = y;
+	this.z = z;
+
+	this.gx = 0;
+	this.gy = 0;
+	this.gz = 0;
+
+	this.xa = 0;
+	this.ya = .1;
+	this.za = 0;
+	this.f = 1;
+	
+	this.id = Math.random();
+	
+	this.screenXpos = 0;
+	this.screenYpos = 0;
+	this.sizeOnScreen = 0;
+
+	this.colour = Math.round(Math.random()*(COLOUR_ARRAY.length-1));
+}
+
+document.body.onresize = () => {
+
+	let nds = 9 / 16;
+
+	if(window.innerHeight > window.innerWidth * nds) {
+	
+		cvs.width = window.innerWidth * .99;
+		cvs.height = cvs.width * nds;
+	}
+	else {
+	
+		cvs.height = window.innerHeight * .95;
+		cvs.width = cvs.height / nds;
+	}
+	backCvs.width = cvs.width;
+	backCvs.height = cvs.height;
+
+	CWD2 = cvs.width/2;
+	CHD2 = cvs.height/2;
+
+	let wiwd2 = window.innerWidth/2;
+	
+	cvs.style.left = wiwd2 - CWD2;
+	cvs.style.right = wiwd2 + CWD2;
+	backCvs.style.left = cvs.style.left;
+	backCvs.style.right = cvs.style.right;
+	
+	ctx.translate(CWD2, CHD2);
+	
+	if(ENABLE_TRANSPARENCY) ctx.globalAlpha = TRANSPARENCY_LEVEL;
+	bgDrawn = false;	
+
+	ctx.font = cvs.width/50 +'px Courier Bold';
+	ctx.fillStyle = '#fff';
+}
+document.body.onresize();
+
+function deleteFar(maxDist) {
+
+	for(let i = 0; i < particle.length; i++) {
+		
+		if(particle[i].z < 0) particle.splice(i,1);
+		else {
+			let dist = calcDist(particle[i].x,5,particle[i].z,0,5,20);
+			if( dist > maxDist * maxDist ) {
+				particle.splice(i,1);
+			}
+		}
+	}
+}
+
+function createArray(width,height,depth,xp,yp,zp,rad) {
+
+	for(let y = height/2; y > -height/2; y--) {
+		let ym = y*rad*2+yp;
+		for(let x = -width/2; x < width/2; x++) {
+			let xm = (x+.5)*rad*2+xp;
+			for(let z = -depth/2; z < depth/2; z++) {
+				particle.push(new Particle(xm,ym,(z+.5)*rad*2+zp,rad));
+			}
+		}
+	}
+}
+
+function release(x,y,z,r) {
+
+	let canRelease = true;
+	
+	for(let i = 0; i < particle.length; i++) {
+		if(particle[i].y < y + particle[i].radius * 2) canRelease = false;
+	}
+	if(canRelease) createArray(3,1,3,x,y,z,r);
+}
+
+function updateTime() {
+
+	nowUpdate = new Date();
+	timeDiff = lastUpdate - nowUpdate;
+	lastUpdate = nowUpdate;
+
+	if(nowUpdate -lastSec > 1000) {
+		lastSec = new Date();
+		fps = frameCount;
+		frameCount = 0;
+	}
+}
+
+//find distance to next collision
+function distToNext(p) {
+	let closestDist = null;
+	for(let p2=0; p2<particle.length; p2++) {
+		if(particle[p].id !== particle[p2].id) {
+			let xzd = calcDist(particle[p].x,0,particle[p].z,particle[p2].x,0,particle[p2].z);
+			let compare = particle[p].radius *.99 + particle[p2].radius *.99;
+			compare *= compare;
+			if( xzd < compare ) {
+				let yd = calcDist(0,particle[p].y,0,0,particle[p2].y,0);
+				if( yd < closestDist ) {
+					closestDist = Math.sqrt(yd);
+				}
+			}
+		}
+	}
+	return closestDist;
+}
+
+//must be able to speed up and use timediff
+const PHYSICS_SPEED = 1000000000;
+function doPhysics() {
+
+	//fixes some collision problems and avoids undefined error
+	particle.sort((a,b)=>{
+		if(a.y<b.y) return 1;
+		else return -1;
+	});
+
+	for(let s = 0; s < particle.length; s++){
+
+	if(particle[s].f>0){
+	
+		let xchange = particle[s].xa*particle[s].f;
+		let ychange = particle[s].ya*particle[s].f;
+		let zchange = particle[s].za*particle[s].f;
+		
+		particle[s].y+=ychange;
+		particle[s].x+=xchange;
+		particle[s].z+=zchange;
+		
+		let onAnother = false;
+		
+		for(let s2 = 0; s2 < particle.length; s2++){
+
+			if(s!==s2) {
+
+				let dist = calcDist(particle[s].x,particle[s].y,particle[s].z,particle[s2].x,particle[s2].y,particle[s2].z);
+			
+				if(dist < particle[s].radius *.99 + particle[s2].radius *.99 ) {
+
+					let xa = calcAngle(particle[s].y-particle[s2].y,particle[s].z-particle[s2].z)*.0005;
+					let za = calcAngle(particle[s].x-particle[s2].x,particle[s].y-particle[s2].y)*.0005;
+
+					if(particle[s].x>particle[s2].x) {
+						particle[s].xa += xa;
+						particle[s2].xa -= xa;
+					}
+					else {
+						particle[s].xa -= xa;
+						particle[s2].xa += xa;
+					}
+
+					if(particle[s].z>particle[s2].z) {
+						particle[s].za += za;
+						particle[s2].za -= za;
+					}
+					else {
+						particle[s].za -= za;
+						particle[s2].za += za;
+					}
+
+					if(particle[s].y<particle[s2].y) {
+						particle[s].ya*=.3;
+						particle[s].xa/=1.1;
+						particle[s].za/=1.1;
+						onAnother = true;
+					}
+					else {
+						particle[s2].ya*=.3;
+						particle[s2].xa/=1.1;
+						particle[s2].za/=1.1;
+						onAnother = true;
+					}
+				}
+			}
+		}
+		
+		//if already on bottom, its not going up
+		if(particle[s].y > 5) {
+			//for bounce
+//			particle[s].ya*=-.3;
+			particle[s].ya = 0;
+			//else
+			particle[s].y = 5;
+			particle[s].xa = 0;
+			particle[s].za = 0;
+		}
+		else particle[s].ya+=.01;
+	}
+	}
+	/*
+	for(let p = 0; p < particle.length; p++){
+		for(let p2 = 0; p2 < particle.length; p2++){
+			if(p !== p2) {
+				let dist = calcDist(particle[p].x,particle[p].y,particle[p].z,particle[p2].x,particle[p2].y,particle[p2].z);
+				let compare = particle[p].radius * .99 + particle[p].radius *.99;
+				compare *= compare;
+				if(dist < compare) {
+					if(p<p2) {
+						particle.splice(p2,1);
+						particle.splice(p,1);
+					}
+					else {
+						particle.splice(p,1);
+						particle.splice(p2,1);
+					}
+				}
+			}
+		}
+	}*/
+}
+
+function display() {
+
+	ctx.clearRect(-CWD2, -CHD2, cvs.width, cvs.height);
+
+	particle.forEach(s=>{
+
+		if(s.z>0) ctx.drawImage(caccvs[s.colour],s.screenXpos,s.screenYpos,s.sizeOnScreen,s.sizeOnScreen);
+	});
+
+	displayMirrors();
+	
+	ctx.fillText(' Particle Count: ' +particle.length+' * '+7+' = '+particle.length*7, -CWD2, -CHD2 + cvs.width/50);
+	ctx.fillText(' FPS: '+fps, -CWD2, -CHD2 + cvs.width/50*2);
+	frameCount++;
+}
+
+function distToCameraSort() {
+	
+	//distance sort	
+	particle.sort( (a,b) => {
+		if(a.gz > 0) {
+			let x1 = a.gx * a.gx + a.gy * a.gy + a.gz * a.gz;
+			let x2 = b.gx * b.gx + b.gy * b.gy + b.gz * b.gz;
+			if( x1 > x2 ) return -1;
+			else return 1;
+		}
+		return -1;
+	});
+}
+
+function calcScreenPos() {
+
+	particle.forEach(s=>{
+		if(s.z>0) {
+			let cdz = (cvs.height/s.gz);
+			let cdzxsr = cdz * s.radius;
+			s.sizeOnScreen = cdzxsr*2;
+			s.screenXpos = s.gx*cdz-cdzxsr;
+			s.screenYpos = s.gy*cdz-cdzxsr;
+		}
+	});
+}
+
+var bgDrawn = false;
+function drawBGImage() {
+	if(ENABLE_BACKGROUND_IMAGE && backgroundReady && !bgDrawn) {
+		backCtx.drawImage(background, 0, 0, backCvs.width, backCvs.height);
+		bgDrawn = true;
+	}
+	else if(!bgDrawn && !ENABLE_BACKGROUND_IMAGE){
+//		backCtx.fillStyle = '#222';
+//		backCtx.fillRect(0,backCvs.height/2,backCvs.width,backCvs.height);
+//		backCtx.fillStyle = '#777';
+//		backCtx.fillRect(0,0,backCvs.width,backCvs.height/2);
+//		backCtx.fillStyle = '#608038';
+		backCtx.fillStyle = BACKGROUND_COLOR;
+		backCtx.fillRect(0,0,backCvs.width,backCvs.height);
+		bgDrawn = true;
+	}
+}
+
+function globalRotate() {
+	gzr +=timeDiff*.0002;
+	let ct = Math.cos(gzr);
+	let st = Math.sin(gzr);
+	particle.forEach(p=>{
+		p.gx = p.x * ct - (p.z-20) * st;
+		p.gy = p.y;
+		p.gz = p.x * st + (p.z-20) * ct + 20;
+	});
+}
+
+function displayMirrors() {
+
+	const Mirrors = 1;
+//	ctx.save();
+	ctx.translate(-cvs.width/2,-cvs.height/2);
+//	ctx.setTransform(1,.2,.2,1,0,0);
+	let newCvs = document.createElement('canvas');
+	let newCtx = newCvs.getContext('2d');
+	newCvs.width = cvs.width;
+	newCvs.height = cvs.height;
+	newCtx.drawImage(cvs,0,0);
+
+	ctx.clearRect(0,0,cvs.width,cvs.height);
+
+	ctx.drawImage(newCvs,-cvs.width*.3,-cvs.height*.1,cvs.width*.7,cvs.height*.7);
+	ctx.drawImage(newCvs,cvs.width*.6,-cvs.height*.1,cvs.width*.7,cvs.height*.7);
+	ctx.drawImage(newCvs,cvs.width*.03,-cvs.height*.1,cvs.width*.7,cvs.height*.7);
+	ctx.drawImage(newCvs,cvs.width*.3,-cvs.height*.1,cvs.width*.7,cvs.height*.7);
+
+	ctx.drawImage(caccvs[0],cvs.width/10*4,cvs.width/10*1.7,cvs.width/10*2,cvs.width/10*2);
+
+	ctx.drawImage(newCvs,-cvs.width*.2,cvs.height*.1,cvs.width*.85,cvs.height*.85);
+	ctx.drawImage(newCvs,cvs.width*.35,cvs.height*.1,cvs.width*.85,cvs.height*.85);
+
+	ctx.drawImage(newCvs,0,cvs.height*.2);
+//	ctx.drawImage(newCvs,-cvs.width*.3,cvs.height*.1,cvs.width,cvs.height);
+//	ctx.drawImage(newCvs,cvs.width*.3,cvs.height*.1,cvs.width,cvs.height);
+	
+	ctx.translate(cvs.width/2,cvs.height/2);
+//	ctx.restore();
+}
+
+//createArray(2,15,2,0,0,20,.5);
+
+//Main Function
+setInterval(()=>{
+
+	updateTime();	
+//	particle.forEach(p=>{
+//		p.colour = Math.round(Math.random()*(COLOUR_ARRAY.length-1));
+//	});
+	if(fps > 25) release(0,-9,20,.5);	
+//	deleteFar(8);
+	doPhysics();
+	drawBGImage();
+	globalRotate();
+	distToCameraSort();
+	calcScreenPos();
+	display();
+},0);
+
+
+setInterval(()=>{
+	location.reload();
+},1000*60*1);
+
+</script>
