@@ -1,0 +1,146 @@
+<div style='text-align:center;font:50px Courier;height:20%'>
+
+Flash Reader<br>
+
+<label style='color:blue'>
+
+Click to select eBook
+
+<input id='file'type='file'style='display:none'>
+</input>
+
+</label>
+
+<br>
+<a id='bm'style='color:red'>Bookmark</a>
+
+<div id='text'style='text-align:center;font:50px courier;height:100%;position:absolute;top:40%;bottom:0px;left:0px;right:0px;z-index:0'></div>
+
+<div style='text-align:center;position:absolute;bottom:0px;left:0px;right:0px;font:100px courier;color:red'>
+
+<a id='slow'>-</a>
+<a id='rw'><< </a>
+<a id='play'>> </a>
+<a id='ff'>>></a>
+<a id='fast'>+</a>
+
+</div>
+
+<script>
+
+var speed=_speed=150
+var now=past=new Date
+var elapsed=0
+var reverse=false
+var pause=false
+var raising=false
+var slowing=false
+
+fast.ontouchstart=a=>raising=true
+fast.ontouchend=a=>raising=false
+slow.ontouchstart=a=>slowing=true
+slow.ontouchend=a=>slowing=false
+
+bm.onclick=a=>{
+book.index=prompt('bookmark #')
+pause=false
+}
+
+ff.onclick=a=>{
+_speed=.1
+reverse=false
+pause=false
+}
+
+play.onclick=a=>{
+if(_speed===speed)pause=!pause
+_speed=speed
+reverse=false
+}
+
+/*text.onclick=a=>{
+if(_speed===speed)pause=!pause
+_speed=speed
+reverse=false
+}*/
+
+rw.onclick=a=>{
+_speed=.1
+reverse=true
+pause=false
+}
+
+file.onchange=a=>{
+let fr=new FileReader
+fr.readAsText(file.files[0])
+fr.onload=a=>{
+book=null
+book=new Book(fr.result)
+}
+}
+
+var Book=function(data){
+
+this.data=data
+this.index=0
+this.reverse=''
+
+for(let i=this.data.length-1;i>-1;i=i-1)
+this.reverse+=this.data[i]
+
+this.next=a=>{
+
+let index2=this.index
+let next2=0
+while(next2<index2+1&&next2!==-1){
+next2=[this.data.indexOf(' ',index2),this.data.indexOf(',',index2),this.data.indexOf('.',index2),this.data.indexOf('\n',index2),this.data.indexOf('-',index2)].sort((a,b)=>a-b)[0]
+index2++
+}
+let ret=this.data.slice(index2-1,next2+1)
+this.index=next2+1
+return(ret)
+}
+
+this.previous=a=>{
+let index2=this.data.length-this.index
+let next2=0
+while(next2<index2+1&&next2!==-1){
+next2=[this.reverse.indexOf(' ',index2),this.reverse.indexOf(',',index2),this.reverse.indexOf('.',index2),this.reverse.indexOf('\n',index2)].sort((a,b)=>a-b)[0]
+index2++
+}
+let ret=this.reverse.slice(index2-1,next2+1)
+this.index=this.data.length-next2
+let ret2=''
+for(let i=ret.length-1;i>-1;i=i-1)ret2+=ret[i]
+return(ret2)
+}
+
+}
+
+var book
+
+setInterval(a=>{
+past=now
+now=new Date
+elapsed+=now-past
+
+if(raising){
+speed-=elapsed*.001
+_speed=speed
+}
+else if(slowing){
+speed+=elapsed*.001
+_speed=speed
+}
+if(elapsed>_speed){
+while(elapsed>_speed)elapsed-=_speed
+if(!pause){
+if(!reverse) text.innerHTML=book.next()
+else text.innerHTML=book.previous()
+text.innerHTML+='<br><br>'+book.index+'<br>'+Math.round(60000/speed)+'wpm 1:'+Math.round(speed)+'ms'
+}
+}
+})
+
+
+</script>
