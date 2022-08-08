@@ -1,146 +1,193 @@
-<div style='text-align:center;font:50px Courier;height:20%'>
+<body style='font: 80px monospace;background:linear-gradient(#000,#000)'>
 
-Flash Reader<br>
+<label id='_select'style='position:absolute;text-align:center;left:0;right:0;top:45%;color:#fff'>
 
-<label style='color:blue'>
+Select eBook<br>
 
-Click to select eBook
-
-<input id='file'type='file'style='display:none'>
+<input id='_file'type='file'style='display:none'>
 </input>
 
 </label>
 
-<br>
-<a id='bm'style='color:red'>Bookmark</a>
+<div id='_word'style='position:absolute;text-align:center;left:0;right:0;top:46%;color:#fff;font:bold italic 120px monospace'></div>
 
-<div id='text'style='text-align:center;font:50px courier;height:100%;position:absolute;top:40%;bottom:0px;left:0px;right:0px;z-index:0'></div>
+<div id='_stats'style='position:absolute;text-align:center;left:0;right:0;top:0;color:#fff;background:linear-gradient(#000,#444)'>
+<a id='_lev'></a>
+<a id='_exp'></a>
+</div>
 
-<div style='text-align:center;position:absolute;bottom:0px;left:0px;right:0px;font:100px courier;color:red'>
-
-<a id='slow'>-</a>
-<a id='rw'><< </a>
-<a id='play'>> </a>
-<a id='ff'>>></a>
-<a id='fast'>+</a>
-
+<div id='_posDiv'style='position:absolute;text-align:center;left:0;right:0;bottom:0;color:#fff;background:linear-gradient(#444,#000)'>
+<a id='_pos'></a>
 </div>
 
 <script>
 
-var speed=_speed=150
-var now=past=new Date
-var elapsed=0
-var reverse=false
-var pause=false
-var raising=false
-var slowing=false
+color2=[[255,200,0],[255,0,0]]
 
-fast.ontouchstart=a=>raising=true
-fast.ontouchend=a=>raising=false
-slow.ontouchstart=a=>slowing=true
-slow.ontouchend=a=>slowing=false
+color=[[255,200,0],[255,0,0]]
 
-bm.onclick=a=>{
-book.index=prompt('bookmark #')
-pause=false
-}
+book=0
+index=0
+fn=0
 
-ff.onclick=a=>{
-_speed=.1
-reverse=false
-pause=false
-}
+now=0
+wordUpdate=0
+expUpdate=0
 
-play.onclick=a=>{
-if(_speed===speed)pause=!pause
-_speed=speed
-reverse=false
-}
+exp=0
+lev=1
 
-/*text.onclick=a=>{
-if(_speed===speed)pause=!pause
-_speed=speed
-reverse=false
-}*/
+cookie=document.cookie
 
-rw.onclick=a=>{
-_speed=.1
-reverse=true
-pause=false
-}
-
-file.onchange=a=>{
-let fr=new FileReader
-fr.readAsText(file.files[0])
+_file.onchange=a=>{
+fr=new FileReader
+fr.readAsText(_file.files[0])
 fr.onload=a=>{
-book=null
-book=new Book(fr.result)
+
+book=fr.result
+fn=_file.files[0].name
+document.body.removeChild(_select)
+
+cookie+=';'
+//alert(cookie)
+
+fn2=fn.replace(/:/,'')
+i=cookie.indexOf(fn2+'=')+fn2.length+1
+if(i!==-1)
+index=+cookie.slice(i,cookie.indexOf(';',i))
+i=cookie.indexOf('exp=')+4
+
+exp=+cookie.slice(i,cookie.indexOf(';',i))
+
+if(index>=book.length||isNaN(index))index=0
+start()
 }
 }
 
-var Book=function(data){
-
-this.data=data
-this.index=0
-this.reverse=''
-
-for(let i=this.data.length-1;i>-1;i=i-1)
-this.reverse+=this.data[i]
-
-this.next=a=>{
-
-let index2=this.index
-let next2=0
-while(next2<index2+1&&next2!==-1){
-next2=[this.data.indexOf(' ',index2),this.data.indexOf(',',index2),this.data.indexOf('.',index2),this.data.indexOf('\n',index2),this.data.indexOf('-',index2)].sort((a,b)=>a-b)[0]
-index2++
-}
-let ret=this.data.slice(index2-1,next2+1)
-this.index=next2+1
-return(ret)
-}
-
-this.previous=a=>{
-let index2=this.data.length-this.index
-let next2=0
-while(next2<index2+1&&next2!==-1){
-next2=[this.reverse.indexOf(' ',index2),this.reverse.indexOf(',',index2),this.reverse.indexOf('.',index2),this.reverse.indexOf('\n',index2)].sort((a,b)=>a-b)[0]
-index2++
-}
-let ret=this.reverse.slice(index2-1,next2+1)
-this.index=this.data.length-next2
-let ret2=''
-for(let i=ret.length-1;i>-1;i=i-1)ret2+=ret[i]
-return(ret2)
-}
-
-}
-
-var book
-
-setInterval(a=>{
-past=now
+start=a=>{
 now=new Date
-elapsed+=now-past
+setInterval(grind)
+}
 
-if(raising){
-speed-=elapsed*.001
-_speed=speed
-}
-else if(slowing){
-speed+=elapsed*.001
-_speed=speed
-}
-if(elapsed>_speed){
-while(elapsed>_speed)elapsed-=_speed
-if(!pause){
-if(!reverse) text.innerHTML=book.next()
-else text.innerHTML=book.previous()
-text.innerHTML+='<br><br>'+book.index+'<br>'+Math.round(60000/speed)+'wpm 1:'+Math.round(speed)+'ms'
-}
-}
-})
+colorfy=(a,b)=>{
 
+if(a.innerHTML.length===0)return -1
+
+o=a.innerHTML
+a.innerHTML=''
+
+k=0
+//d=[position of next color,
+d=[[0,0]]
+for(i=0;i<o.length;i++){
+l=Math.round(i/o.length*(b.length-2))
+// if(l>=b.length-1)l--
+if(l>k){
+k=l
+d.push([i,l])
+}
+}
+d.push([o.length,b.length-1])
+//alert(d)
+
+j=0
+for(k=0;k<d.length-1;k++){
+for(i=d[k][0];i<d[k+1][0];i++){
+
+c=[]
+c.push(b[d[k][1]][0])
+c.push(b[d[k][1]][1])
+c.push(b[d[k][1]][2])
+
+m=i-d[k][0]
+n=d[k+1][0]-d[k][0]-1
+p=m/n
+if(isNaN(p))p=0
+//alert(m+' '+n+' '+p)
+
+for(l=0;l<c.length;l++){
+
+c[l]*=(1-p)
+//if(isNaN(c[l]))c[l]=0
+
+if(k+1<d.length)c[l]+=b[d[k+1][1]][l]*p
+else c[l]=b[d[k][1]][l]
+
+c[l]=Math.round(c[l])
+
+//alert(c[l])
+
+c[l]=c[l].toString(16)
+if(c[l].length===1)c[l]=0+c[l]
+//alert(c[l])
+}
+
+a.innerHTML+='<a style=\'color:#'+c[0]+c[1]+c[2]+'\'>'+o[j]+'</a>'
+
+j++
+}
+}
+
+}
+
+grind=a=>{
+
+last=now
+now=new Date
+wordUpdate+=now-last
+expUpdate+=now-last
+cut=''
+
+if(wordUpdate>300){
+
+expiry=new Date
+expiry.setTime(expiry.getTime()+365*24*60*60*1000)
+fn2=fn.replace(/:/,'')
+document.cookie=fn2+'='+index+';expires='+expiry.toUTCString()
+
+while(cut.trim().length===0){
+next=book.slice(index+1).search(/\s/)
+
+if(next===-1){
+index=0
+next=0
+}
+else{
+next+=index+1
+}
+cut=book.slice(index,next)
+index=next
+}
+
+_word.innerHTML=cut.trim()
+colorfy(_word,color2)
+_pos.innerHTML='Book:' +Math.round(index/book.length*1000000000)/10000000+'%'
+colorfy(_pos,color)
+
+while(wordUpdate>300)wordUpdate-=300
+}
+
+if(expUpdate>1){
+
+expiry=new Date
+expiry.setTime(expiry.getTime()+365*24*60*60*1000)
+
+document.cookie='exp='+exp+';expires='+expiry.toUTCString()
+
+exp++
+
+_lev.innerHTML='Lev:'+lev
+_exp.innerHTML='Exp:'+exp
+
+colorfy(_lev,color)
+colorfy(_exp,color)
+
+while(expUpdate>1)expUpdate-=1
+}
+}
+
+window.onresize=a=>{
+_posDiv.style.bottom='0%'
+}
 
 </script>
