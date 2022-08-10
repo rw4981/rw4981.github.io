@@ -81,24 +81,23 @@ _file.onchange=a=>{
     cookie=document.cookie
 
     cookie+=';'
-    //alert(cookie)
 
     fn2=fn.replace(/:/,'')
     i=cookie.indexOf(fn2+'=')+fn2.length+1
 
-if(i!==-1)
-index=+cookie.slice(i,cookie.indexOf(';',i))
+    if(i!==-1)index=+cookie.slice(i,cookie.indexOf(';',i))
+
     i=cookie.indexOf('exp=')+4
+    if(i!==-1)exp=+cookie.slice(i,cookie.indexOf(';',i))
 
-if(i!==-1)
-exp=+cookie.slice(i,cookie.indexOf(';',i))
+    i=cookie.indexOf('speed=')+6
 
-i=cookie.indexOf('speed=')+6
-
-if(i!==-1)
-speed=+cookie.slice(i,cookie.indexOf(';',i))
-   
-if(index>=book.length||isNaN(index))index=0
+    if(i!==-1)speed=+cookie.slice(i,cookie.indexOf(';',i))     
+    
+	if(speed===0)speed=150;
+	
+    if(index>=book.length||isNaN(index))index=0
+	
     start()
   }
 }
@@ -178,15 +177,15 @@ a.innerHTML+='<a style=\'color:#'+c[0]+c[1]+c[2]+'\'>'+o[j]+'</a>'
 cut=''
 grind=a=>{
 
-    _speed.innerHTML=Math.round(60000/speed)+'wpm'
-colorfy(_speed,style[choice][0])
+  _speed.innerHTML=Math.round(60000/speed)+'wpm'
+  colorfy(_speed,style[choice][0])
 
-expiry=new Date
-    expiry.setTime(expiry.getTime()+365*24*60*60*1000)
+  expiry=new Date
+  expiry.setTime(expiry.getTime()+365*24*60*60*1000)
 
-document.cookie='speed='+speed+';expires='+expiry.toUTCString()
+  document.cookie='speed='+speed+';expires='+expiry.toUTCString()
 
-if(change===1&&speed>10)speed-=speed*.001
+  if(change===1&&speed>10)speed-=speed*.001
   else if(change===2)speed+=speed*.001
 
   last=now
@@ -194,45 +193,46 @@ if(change===1&&speed>10)speed-=speed*.001
   wordUpdate+=now-last
   expUpdate+=now-last
 
-_word.style.bottom=(Math.cos(wordUpdate/speed*100*Math.PI/50/2))*-5+50+'%'
+  _word.style.bottom=(Math.cos(wordUpdate/speed*100*Math.PI/50/2))*-5+50+'%'
 
-_word.innerHTML=cut.trim()
+  _word.innerHTML=cut.trim()
+  colorfy(_word,style[choice][0],wordUpdate/speed)
 
-colorfy(_word,style[choice][0],wordUpdate/speed)
-
-_word.style.font='italic '+150*wordUpdate/speed+'px monospace'
+  _word.style.font='italic '+150*wordUpdate/speed+'px monospace'
 
   if(wordUpdate>speed){
 
     expiry=new Date
     expiry.setTime(expiry.getTime()+365*24*60*60*1000)
     fn2=fn.replace(/:/,'')
-document.cookie=fn2+'='+index+';expires='+expiry.toUTCString()
-      next=book.slice(index+1).search(/\s/)
+    document.cookie=fn2+'='+index+';expires='+expiry.toUTCString()
+    
+	next=book.slice(index+1).search(/\s/)
 
-      if(next===-1){
-        index=0
-        next=0
-      }
-      else{
-        next+=index+1
-      }
-      
-cut=book.slice(index,next)
-      index=next
+    if(next===-1){
+      index=0
+      next=0
     }
+    else{
+      next+=index+1
+    }
+  
+  
+    cut=book.slice(index,next)
+    
+	index=next
 
-_pos.innerHTML='Book:' +Math.round(index/book.length*1000000000)/10000000+'%'
+    _pos.innerHTML='Book:' +Math.round(index/book.length*1000000000)/10000000+'%'
     colorfy(_pos,style[choice][0])
 
     while(wordUpdate>speed)wordUpdate-=speed
+  }
 
   if(expUpdate>100){
 
     expiry=new Date
     expiry.setTime(expiry.getTime()+365*24*60*60*1000)
-
-document.cookie='exp='+exp+';expires='+expiry.toUTCString()
+    document.cookie='exp='+exp+';expires='+expiry.toUTCString()
 
     exp++
 
