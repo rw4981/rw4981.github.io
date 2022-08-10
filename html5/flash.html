@@ -1,4 +1,4 @@
-<body style='font: 80px monospace;background:linear-gradient(#000,#000)'>
+<body style='font:80px monospace;background:linear-gradient(#000,#000)'>
 
 <label id='_select'style='position:absolute;text-align:center;left:0;right:0;top:45%;color:#fff'>
 
@@ -9,22 +9,35 @@ Select eBook<br>
 
 </label>
 
-<div id='_word'style='position:absolute;text-align:center;left:0;right:0;top:46%;color:#fff;font:bold italic 120px monospace'></div>
+<div id='_word'style='position:absolute;text-align:center;left:0;right:0;font:italic 120px monospace'></div>
 
-<div id='_stats'style='position:absolute;text-align:center;left:0;right:0;top:0;color:#fff;background:linear-gradient(#000,#444)'>
+<div id='_stats'style=';text-align:center;left:0;right:0;background:linear-gradient(#000,#444)'>
 <a id='_lev'></a>
 <a id='_exp'></a>
 </div>
 
-<div id='_posDiv'style='position:absolute;text-align:center;left:0;right:0;bottom:0;color:#fff;background:linear-gradient(#444,#000)'>
+<div id='_posDiv'style='position:absolute;text-align:center;left:0;right:0;bottom:0;color:#fff;background:linear-gradient(#555,#000)'>
 <a id='_pos'></a>
+</div>
+
+<div id='_control'style='position:absolute;text-align:center;left:0;right:0;bottom:5.6%'>
+<a id='_slow'></a>
+<a id='_speed'></a>
+<a id='_fast'></a>
 </div>
 
 <script>
 
-color2=[[255,200,0],[255,0,0]]
+style=[]
 
-color=[[255,200,0],[255,0,0]]
+style.push([[[255,255,255],[255,255,255]],[[0,0,0],[0,0,0]],'#000','#fff'])
+
+style.push([[[255,200,0],[255,0,0]],[[63,50,0],[63,0,0]],'#000','#fc0'])
+
+style.push([[[175,0,255],[255,201,0]],[[255,255,255],[255,256,255]],'#000','#000'])
+
+speed=150
+choice=0
 
 book=0
 index=0
@@ -37,157 +50,204 @@ expUpdate=0
 exp=0
 lev=1
 
-cookie=document.cookie
+stage=0
+change=0
+
+_slow.ontouchstart=a=>{
+  change=2
+}
+
+_fast.ontouchstart=a=>{
+  change=1
+}
+
+_slow.ontouchend=a=>{
+  change=0
+}
+
+_fast.ontouchend=a=>{
+  change=0
+}
 
 _file.onchange=a=>{
-fr=new FileReader
-fr.readAsText(_file.files[0])
-fr.onload=a=>{
+  fr=new FileReader
+  fr.readAsText(_file.files[0])
+  fr.onload=a=>{
 
-book=fr.result
-fn=_file.files[0].name
-document.body.removeChild(_select)
+    book=fr.result
+    fn=_file.files[0].name
+    document.body.removeChild(_select)
+    
+    cookie=document.cookie
 
-cookie+=';'
-//alert(cookie)
+    cookie+=';'
+    //alert(cookie)
 
-fn2=fn.replace(/:/,'')
-i=cookie.indexOf(fn2+'=')+fn2.length+1
+    fn2=fn.replace(/:/,'')
+    i=cookie.indexOf(fn2+'=')+fn2.length+1
+
 if(i!==-1)
 index=+cookie.slice(i,cookie.indexOf(';',i))
-i=cookie.indexOf('exp=')+4
+    i=cookie.indexOf('exp=')+4
 
+if(i!==-1)
 exp=+cookie.slice(i,cookie.indexOf(';',i))
 
+i=cookie.indexOf('speed=')+6
+
+if(i!==-1)
+speed=+cookie.slice(i,cookie.indexOf(';',i))
+   
 if(index>=book.length||isNaN(index))index=0
-start()
-}
+    start()
+  }
 }
 
 start=a=>{
-now=new Date
-setInterval(grind)
+  now=new Date
+
+  _fast.innerHTML='+'
+  colorfy(_fast,style[choice][0])
+  _slow.innerHTML='-'
+  colorfy(_slow,style[choice][0])
+
+  setInterval(grind)
 }
 
-colorfy=(a,b)=>{
+colorfy=(a,b,intensity=1)=>{
+  
+  o=a.innerHTML
+  a.innerHTML=''
 
-if(a.innerHTML.length===0)return -1
+  k=0
+  //d=[position of next color,
+  d=[[0,0]]
+  for(i=0;i<o.length;i++){
+    l=Math.round(i/o.length*(b.length-2))
+   // if(l>=b.length-1)l--
+    if(l>k){
+      k=l
+      d.push([i,l])
+    }
+  }
+  d.push([o.length,b.length-1])
+  //alert(d)
 
-o=a.innerHTML
-a.innerHTML=''
+  j=0
+  for(k=0;k<d.length-1;k++){
+    for(i=d[k][0];i<d[k+1][0];i++){
 
-k=0
-//d=[position of next color,
-d=[[0,0]]
-for(i=0;i<o.length;i++){
-l=Math.round(i/o.length*(b.length-2))
-// if(l>=b.length-1)l--
-if(l>k){
-k=l
-d.push([i,l])
-}
-}
-d.push([o.length,b.length-1])
-//alert(d)
+      c=[]
+      c.push(b[d[k][1]][0])
+      c.push(b[d[k][1]][1])
+      c.push(b[d[k][1]][2])
 
-j=0
-for(k=0;k<d.length-1;k++){
-for(i=d[k][0];i<d[k+1][0];i++){
+      m=i-d[k][0]
+      n=d[k+1][0]-d[k][0]-1
+      p=m/n
+      if(isNaN(p))p=0
+      //alert(m+' '+n+' '+p)
 
-c=[]
-c.push(b[d[k][1]][0])
-c.push(b[d[k][1]][1])
-c.push(b[d[k][1]][2])
+      for(l=0;l<c.length;l++){
 
-m=i-d[k][0]
-n=d[k+1][0]-d[k][0]-1
-p=m/n
-if(isNaN(p))p=0
-//alert(m+' '+n+' '+p)
+        c[l]*=(1-p)
+        //if(isNaN(c[l]))c[l]=0
 
-for(l=0;l<c.length;l++){
+        if(k+1<d.length)c[l]+=b[d[k+1][1]][l]*p
+        else c[l]=b[d[k][1]][l]
 
-c[l]*=(1-p)
-//if(isNaN(c[l]))c[l]=0
-
-if(k+1<d.length)c[l]+=b[d[k+1][1]][l]*p
-else c[l]=b[d[k][1]][l]
-
+        c[l]*=intensity
 c[l]=Math.round(c[l])
 
-//alert(c[l])
+        //alert(c[l])
 
-c[l]=c[l].toString(16)
-if(c[l].length===1)c[l]=0+c[l]
-//alert(c[l])
-}
+        if(c[l]>255)c[l]=255
+        c[l]=c[l].toString(16)
+        if(c[l].length===1)c[l]=0+c[l]
+        //alert(c[l])
+      }
 
 a.innerHTML+='<a style=\'color:#'+c[0]+c[1]+c[2]+'\'>'+o[j]+'</a>'
 
-j++
-}
-}
+      j++
+    }
+  }
 
 }
 
+cut=''
 grind=a=>{
 
-last=now
-now=new Date
-wordUpdate+=now-last
-expUpdate+=now-last
-cut=''
-
-if(wordUpdate>300){
+    _speed.innerHTML=Math.round(60000/speed)+'wpm'
+colorfy(_speed,style[choice][0])
 
 expiry=new Date
-expiry.setTime(expiry.getTime()+365*24*60*60*1000)
-fn2=fn.replace(/:/,'')
-document.cookie=fn2+'='+index+';expires='+expiry.toUTCString()
+    expiry.setTime(expiry.getTime()+365*24*60*60*1000)
 
-while(cut.trim().length===0){
-next=book.slice(index+1).search(/\s/)
+document.cookie='speed='+speed+';expires='+expiry.toUTCString()
 
-if(next===-1){
-index=0
-next=0
-}
-else{
-next+=index+1
-}
-cut=book.slice(index,next)
-index=next
-}
+if(change===1&&speed>10)speed-=speed*.001
+  else if(change===2)speed+=speed*.001
+
+  last=now
+  now=new Date
+  wordUpdate+=now-last
+  expUpdate+=now-last
+
+_word.style.bottom=(Math.cos(wordUpdate/speed*100*Math.PI/50/2))*-5+50+'%'
 
 _word.innerHTML=cut.trim()
-colorfy(_word,color2)
+
+colorfy(_word,style[choice][0],wordUpdate/speed)
+
+_word.style.font='italic '+150*wordUpdate/speed+'px monospace'
+
+  if(wordUpdate>speed){
+
+    expiry=new Date
+    expiry.setTime(expiry.getTime()+365*24*60*60*1000)
+    fn2=fn.replace(/:/,'')
+document.cookie=fn2+'='+index+';expires='+expiry.toUTCString()
+      next=book.slice(index+1).search(/\s/)
+
+      if(next===-1){
+        index=0
+        next=0
+      }
+      else{
+        next+=index+1
+      }
+      
+cut=book.slice(index,next)
+      index=next
+    }
+
 _pos.innerHTML='Book:' +Math.round(index/book.length*1000000000)/10000000+'%'
-colorfy(_pos,color)
+    colorfy(_pos,style[choice][0])
 
-while(wordUpdate>300)wordUpdate-=300
-}
+    while(wordUpdate>speed)wordUpdate-=speed
 
-if(expUpdate>1){
+  if(expUpdate>100){
 
-expiry=new Date
-expiry.setTime(expiry.getTime()+365*24*60*60*1000)
+    expiry=new Date
+    expiry.setTime(expiry.getTime()+365*24*60*60*1000)
 
 document.cookie='exp='+exp+';expires='+expiry.toUTCString()
 
-exp++
+    exp++
 
-_lev.innerHTML='Lev:'+lev
-_exp.innerHTML='Exp:'+exp
+    _lev.innerHTML='Lev:'+lev
+    _exp.innerHTML='Exp:'+exp
 
-colorfy(_lev,color)
-colorfy(_exp,color)
+    colorfy(_lev,style[choice][0])
+    colorfy(_exp,style[choice][0])
 
-while(expUpdate>1)expUpdate-=1
-}
+    while(expUpdate>100)expUpdate-=100
+  }
 }
 
 window.onresize=a=>{
-_posDiv.style.bottom='0%'
+  _posDiv.style.bottom='0%'
 }
 
 </script>
