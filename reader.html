@@ -27,7 +27,7 @@ getTextForSpeech=a=>{
     t+=a+' '
   })
   u=new SpeechSynthesisUtterance(t)
-  u.rate=3
+  u.rate=2.5
   window.speechSynthesis.speak(u)
   u.onboundary=a=>{
     next=t.slice(a.charIndex,a.charIndex+t.slice(a.charIndex).search(/\s/))
