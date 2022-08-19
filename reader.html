@@ -1,0 +1,43 @@
+<body style="font:80px Courier;color:#fff;background:#000">
+
+<label style="position:absolute;text-align:center;left:0;right:0;bottom:50%">Select .TXT File
+<input id="_file"type="file"style="display:none"></input>
+</label>
+
+<script>
+
+book=0
+u=0
+
+getTextForSpeech=a=>{
+  i=0
+  n=[]
+  for(j=0;j<1000;j++){
+    w=book.slice(i).search(/\s/)
+    c=book.slice(i,w+i)
+	if(c.length>0)n.push(c)
+	i+=w+1
+  }
+  t=''
+  n.forEach(a=>{
+    t+=a+' '
+  })
+  u=new SpeechSynthesisUtterance(t)
+  u.rate=2.5
+  window.speechSynthesis.speak(u)
+  u.onboundary=a=>{
+    next=t.slice(a.charIndex,a.charIndex+t.slice(a.charIndex).search(/\s/))
+    document.body.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
+  }
+}
+
+_file.onchange=a=>{
+  fr=new FileReader
+  fr.readAsText(_file.files[0])
+  fr.onload=a=>{
+    book=fr.result
+	getTextForSpeech()
+  }
+}
+
+</script>
