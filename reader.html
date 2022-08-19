@@ -8,11 +8,11 @@
 
 book=0
 u=0
+i=0
 
 getTextForSpeech=a=>{
-  i=0
   n=[]
-  for(j=0;j<100;j++){
+  for(j=0;j<10;j++){
     w=book.slice(i).search(/\s/)
     c=book.slice(i,w+i)
 	if(c.length>0)n.push(c)
@@ -28,6 +28,9 @@ getTextForSpeech=a=>{
   u.onboundary=a=>{
     next=t.slice(a.charIndex,a.charIndex+t.slice(a.charIndex).search(/\s/))
     document.body.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
+  }
+  u.onend=a=>{
+    getTextForSpeech()
   }
 }
 
