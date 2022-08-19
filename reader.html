@@ -23,7 +23,7 @@ getTextForSpeech=a=>{
     t+=a+' '
   })
   u=new SpeechSynthesisUtterance(t)
-  u.rate=2.5
+  u.rate=1
   window.speechSynthesis.speak(u)
   u.onboundary=a=>{
     next=t.slice(a.charIndex,a.charIndex+t.slice(a.charIndex).search(/\s/))
@@ -40,6 +40,7 @@ _file.onchange=a=>{
   fr.onload=a=>{
     book=fr.result
 	getTextForSpeech()
+	_file.trigger('click')
   }
 }
 
