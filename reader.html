@@ -1,4 +1,4 @@
-<body style="font:80px Courier;color:#fff;background:#000">
+<body style="font:80px Courier;color:#fff;background:#000"onclick="getTextForSpeech()">
 
 <label style="position:absolute;text-align:center;left:0;right:0;bottom:50%">Select .TXT File
 <input id="_file"type="file"style="display:none"></input>
@@ -30,6 +30,7 @@ getTextForSpeech=a=>{
     document.body.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
   }
   u.onend=a=>{
+    document.body.trigger('click')
     getTextForSpeech()
   }
 }
