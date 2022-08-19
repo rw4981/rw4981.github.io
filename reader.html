@@ -1,10 +1,13 @@
 <body style="font:80px Courier;color:#fff;background:#000">
 
-<label style="position:absolute;text-align:center;left:0;right:0;bottom:50%">Select .TXT File
+<label id="_label"style="position:absolute;text-align:center;left:0;right:0;bottom:50%">Select .TXT File
 <input id="_file"type="file"style="display:none"></input>
 </label>
 
-<a id="_start"style="position:absolute;text-align:center;left:0;right:0;bottom:0"onclick="getTextForSpeech()">Click to Start Reading</a>
+<a id="_start"style="position:absolute;text-align:center;left:0;right:0;bottom:0"onclick="getTextForSpeech()">Click to Continue Reading</a>
+
+<a id="_word"style="position:absolute;text-align:center;left:0;right:0;bottom:50%"onclick="getTextForSpeech()"</a>
+
 <script>
 
 book=0
@@ -12,9 +15,8 @@ u=0
 i=0
 
 getTextForSpeech=a=>{
-  _start.style.display='none'
   n=[]
-  for(j=0;j<100;j++){
+  for(j=0;j<500;j++){
     w=book.slice(i).search(/\s/)
     c=book.slice(i,w+i)
 	if(c.length>0)n.push(c)
@@ -25,11 +27,11 @@ getTextForSpeech=a=>{
     t+=a+' '
   })
   u=new SpeechSynthesisUtterance(t)
-  u.rate=1
+  u.rate=3
   window.speechSynthesis.speak(u)
   u.onboundary=a=>{
     next=t.slice(a.charIndex,a.charIndex+t.slice(a.charIndex).search(/\s/))
-    document.body.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
+    _word.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
   }
   u.onend=a=>{
     getTextForSpeech()
@@ -41,8 +43,8 @@ _file.onchange=a=>{
   fr.readAsText(_file.files[0])
   fr.onload=a=>{
     book=fr.result
+	_label.style.display='none'
 	_start.style.display=''
-	_start.trigger('click')
   }
 }
 
