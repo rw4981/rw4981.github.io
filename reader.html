@@ -1,9 +1,10 @@
-<body style="font:80px Courier;color:#fff;background:#000"onclick="getTextForSpeech()">
+<body style="font:80px Courier;color:#fff;background:#000">
 
 <label style="position:absolute;text-align:center;left:0;right:0;bottom:50%">Select .TXT File
 <input id="_file"type="file"style="display:none"></input>
 </label>
 
+<a id="_start"style="position:absolute;text-align:center;left:0;right:0;bottom:0"onclick="getTextForSpeech()">Click to Start Reading</a>
 <script>
 
 book=0
@@ -11,6 +12,7 @@ u=0
 i=0
 
 getTextForSpeech=a=>{
+  _start.style.display='none'
   n=[]
   for(j=0;j<10000;j++){
     w=book.slice(i).search(/\s/)
@@ -32,7 +34,6 @@ getTextForSpeech=a=>{
   u.onend=a=>{
     getTextForSpeech()
   }
-  document.body.trigger('click')
 }
 
 _file.onchange=a=>{
@@ -40,7 +41,10 @@ _file.onchange=a=>{
   fr.readAsText(_file.files[0])
   fr.onload=a=>{
     book=fr.result
+	_start.style.display=''
   }
 }
+
+_start.style.display='none'
 
 </script>
