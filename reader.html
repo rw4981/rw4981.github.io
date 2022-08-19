@@ -12,7 +12,7 @@ i=0
 
 getTextForSpeech=a=>{
   n=[]
-  for(j=0;j<10;j++){
+  for(j=0;j<10000;j++){
     w=book.slice(i).search(/\s/)
     c=book.slice(i,w+i)
 	if(c.length>0)n.push(c)
@@ -30,9 +30,9 @@ getTextForSpeech=a=>{
     document.body.innerHTML='<a style="position:absolute;text-align:center;left:0;right:0;bottom:50%">'+next+'</a>'
   }
   u.onend=a=>{
-    document.body.trigger('click')
     getTextForSpeech()
   }
+  document.body.trigger('click')
 }
 
 _file.onchange=a=>{
@@ -40,8 +40,6 @@ _file.onchange=a=>{
   fr.readAsText(_file.files[0])
   fr.onload=a=>{
     book=fr.result
-	getTextForSpeech()
-	_file.trigger('change')
   }
 }
 
