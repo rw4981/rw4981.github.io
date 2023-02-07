@@ -1,6 +1,7 @@
 game_state = 1;
 intro_wait = false;
 character_select = 0;
+tile_scale = 4;
 
 //load the intro graphics
 intro = new Image();
@@ -73,13 +74,13 @@ function drawScreen() {
         for (var i = -10; i < 10; i++) {
             for (var j = -10; j < 10; j++) {
                 tileType = map[(i+10)*10+j+10];
-                ctx.drawImage(tiles[tileType], canvas.width/2 + i * 64 - 32, canvas.height/2 + j * 64 - 32, 64, 64);
+                ctx.drawImage(tiles[tileType], canvas.width/2 + (i * 64 * tile_scale) - 32 * tile_scale, canvas.height/2 + (j * 64 * tile_scale) - 32 * tile_scale, 64 * tile_scale, 64 * tile_scale);
             }
         }
 
         //draw the sprite
-        if (character_select == 1 && man_sprite.loaded) ctx.drawImage(man_sprite, (canvas.width-64)/2, (canvas.height-64)/2, 64, 64);
-        else if (character_select == 2 && woman_sprite.loaded) ctx.drawImage(woman_sprite, (canvas.width-64)/2, (canvas.height-64)/2, 64, 64);
+        if (character_select == 1 && man_sprite.loaded) ctx.drawImage(man_sprite, (canvas.width-64*tile_scale)/2, (canvas.height-64*tile_scale)/2, 64*tile_scale, 64*tile_scale);
+        else if (character_select == 2 && woman_sprite.loaded) ctx.drawImage(woman_sprite, (canvas.width-64*tile_scale)/2, (canvas.height-64*tile_scale)/2, 64*tile_scale, 64*tile_scale);
     }
 
     else if (game_state == 1 || game_state == 2) {
@@ -219,3 +220,9 @@ canvas.addEventListener('click', function (evt) {
         resizeCanvas();
     }
 });
+
+setInterval(function () {
+    tile_scale=Date.now()/1000%4;
+        
+    resizeCanvas();
+}, 1000/60);
