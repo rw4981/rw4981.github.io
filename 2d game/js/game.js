@@ -194,6 +194,7 @@ canvas.addEventListener('click', function (evt) {
             character_select = 2;
             game_state = 2;
         }
+        else character_select = 0;
 
         resizeCanvas();
     }
