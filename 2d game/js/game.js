@@ -1,4 +1,4 @@
-game_state = 1;
+game_state = 0;
 intro_wait = false;
 character_select = 0;
 tile_scale = 4;
@@ -39,7 +39,7 @@ function generateMap() {
     map = []
     for (var i = 0; i < 100; i++) {
         for (var j = 0; j < 100; j++) {
-            tileType=Math.floor(Math.random()*3);
+            tileType = Math.floor(Math.random() * 3);
             map.push(tileType);
         }
     }
@@ -53,34 +53,34 @@ function drawScreen() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-/*    if (game_state == 0) {
+    if (game_state == 0) {
 
         //draw the intro graphics
         if (intro.loaded) ctx.drawImage(intro, 0, 0, canvas.width, canvas.height);
         if (!intro_wait) {
-            setTimeout(function () { 
+            intro_wait = true;
+            setTimeout(function () {
+                game_state = 1;
                 resizeCanvas();
-                intro_wait = true;
-                game_state = 1; 
-            });
+            }, 3000);
         }
     }
 
-    else*/ if (game_state == 3) {
+    else if (game_state == 3) {
 
-        ctx.filter='none';
+        ctx.filter = 'none';
 
         //draw the map
         for (var i = -10; i < 10; i++) {
             for (var j = -10; j < 10; j++) {
-                tileType = map[(i+10)*10+j+10];
-                ctx.drawImage(tiles[tileType], canvas.width/2 + (i * 64 * tile_scale) - 32 * tile_scale, canvas.height/2 + (j * 64 * tile_scale) - 32 * tile_scale, 64 * tile_scale, 64 * tile_scale);
+                tileType = map[(i + 10) * 10 + j + 10];
+                ctx.drawImage(tiles[tileType], canvas.width / 2 + (i * 64 * tile_scale) - 32 * tile_scale, canvas.height / 2 + (j * 64 * tile_scale) - 32 * tile_scale, 64 * tile_scale, 64 * tile_scale);
             }
         }
 
         //draw the sprite
-        if (character_select == 1 && man_sprite.loaded) ctx.drawImage(man_sprite, (canvas.width-64*tile_scale)/2, (canvas.height-64*tile_scale)/2, 64*tile_scale, 64*tile_scale);
-        else if (character_select == 2 && woman_sprite.loaded) ctx.drawImage(woman_sprite, (canvas.width-64*tile_scale)/2, (canvas.height-64*tile_scale)/2, 64*tile_scale, 64*tile_scale);
+        if (character_select == 1 && man_sprite.loaded) ctx.drawImage(man_sprite, (canvas.width - 64 * tile_scale) / 2, (canvas.height - 64 * tile_scale) / 2, 64 * tile_scale, 64 * tile_scale);
+        else if (character_select == 2 && woman_sprite.loaded) ctx.drawImage(woman_sprite, (canvas.width - 64 * tile_scale) / 2, (canvas.height - 64 * tile_scale) / 2, 64 * tile_scale, 64 * tile_scale);
     }
 
     else if (game_state == 1 || game_state == 2) {
@@ -152,8 +152,8 @@ tiles[2].onload = function () {
 }
 
 //get the context
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
+canvas = document.getElementById("canvas");
+ctx = canvas.getContext("2d");
 
 //resize the canvas
 function resizeCanvas() {
@@ -191,7 +191,7 @@ canvas.addEventListener('click', function (evt) {
             character_select = 1;
             game_state = 2;
         }
-        else if(mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym) {
+        else if (mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym) {
             character_select = 2;
             game_state = 2;
         }
@@ -199,30 +199,30 @@ canvas.addEventListener('click', function (evt) {
 
         resizeCanvas();
     }
-    else if(game_state == 2) {
+    else if (game_state == 2) {
 
         //check the mouse position
         if (mousePos.x > xm && mousePos.x < x + xm && mousePos.y > ym && mousePos.y < y + ym) {
-            if(character_select == 1) game_state = 3;
+            if (character_select == 1) game_state = 3;
             else {
                 character_select = 1;
                 game_state = 1;
             }
         }
-        else if(mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym){
-            if(character_select == 2) game_state = 3;
+        else if (mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym) {
+            if (character_select == 2) game_state = 3;
             else {
                 character_select = 2;
                 game_state = 1;
             }
         }
+        else character_select = 0;
 
         resizeCanvas();
     }
 });
 
 setInterval(function () {
-    tile_scale=Date.now()/1000%4;
-        
+    tile_scale = Date.now() / 1000 % 4;
     resizeCanvas();
-}, 1000/60);
+}, 1000 / 60);
