@@ -56,7 +56,7 @@ function drawScreen() {
         //draw the intro graphics
         if (intro.loaded) ctx.drawImage(intro, 0, 0, canvas.width, canvas.height);
         if (!intro_wait) {
-            setTimeout(function () { game_state = 1; }, 1);
+            setTimeout(function () { game_state = 1; drawScreen(); }, 2000);
             intro_wait = true;
         }
     }
