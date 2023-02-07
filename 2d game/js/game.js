@@ -1,5 +1,6 @@
 game_state = 0;
 intro_wait = false;
+character_select = 0;
 
 //load the intro graphics
 intro = new Image();
@@ -56,13 +57,12 @@ function drawScreen() {
         //draw the intro graphics
         if (intro.loaded) ctx.drawImage(intro, 0, 0, canvas.width, canvas.height);
         if (!intro_wait) {
-            setTimeout(function () { game_state = 1;     resizeCanvas();
-}, 1);
+            setTimeout(function () { game_state = 1; resizeCanvas(); });
             intro_wait = true;
         }
     }
 
-    else if (game_state == 2) {
+    else if (game_state == 3) {
 
         ctx.filter='none';
 
@@ -79,7 +79,7 @@ function drawScreen() {
         else if (character_select == 2 && woman_sprite.loaded) ctx.drawImage(woman_sprite, (canvas.width-64)/2, (canvas.height-64)/2, 64, 64);
     }
 
-    else if (game_state == 1) {
+    else if (game_state == 1 || game_state == 2) {
 
         if (canvas.width > canvas.height) {
             x = canvas.height * .5;
@@ -91,14 +91,6 @@ function drawScreen() {
             x = canvas.width * .5;
             y = canvas.width * 1;
             ym = (canvas.height - (x * 2)) * .5;
-        }
-
-        //check the mouse position
-        if (mousePos.x > xm && mousePos.x < x + xm && mousePos.y > ym && mousePos.y < y + ym) {
-            character_select = 1;
-        }
-        else {
-            character_select = 2;
         }
 
         //draw the sprite
@@ -186,8 +178,39 @@ canvas.addEventListener('mousemove', function (evt) {
 
 //add the mouse click listener
 canvas.addEventListener('click', function (evt) {
+
     if (game_state == 1) {
-        game_state = 2;
+
+        //check the mouse position
+        if (mousePos.x > xm && mousePos.x < x + xm && mousePos.y > ym && mousePos.y < y + ym) {
+            character_select = 1;
+            game_state = 2;
+        }
+        else if(mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym) {
+            character_select = 2;
+            game_state = 2;
+        }
+
+        resizeCanvas();
+    }
+    else if(game_state == 2) {
+
+        //check the mouse position
+        if (mousePos.x > xm && mousePos.x < x + xm && mousePos.y > ym && mousePos.y < y + ym) {
+            if(character_select == 1) game_state = 3;
+            else {
+                character_select = 1;
+                game_state = 1;
+            }
+        }
+        else if(mousePos.x > x + xm && mousePos.x < x * 2 + xm && mousePos.y > ym && mousePos.y < y + ym){
+            if(character_select == 2) game_state = 3;
+            else {
+                character_select = 2;
+                game_state = 1;
+            }
+        }
+
         resizeCanvas();
     }
 });
