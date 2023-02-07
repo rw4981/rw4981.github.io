@@ -66,7 +66,7 @@ function drawScreen() {
             setTimeout(function () {
                 game_state = 1;
                 resizeCanvas();
-            }, 3000);
+            }, 1000);
         }
     }
 
@@ -91,9 +91,9 @@ function drawScreen() {
 
         if (canvas.width > canvas.height) {
             x = canvas.height * .5;
-            y = canvas.height * 1;
+            y = canvas.height * .5*16/9;
             xm = (canvas.width - (x * 2)) * .5;
-            ym = 0;
+            ym = (canvas.height - canvas.height * .5*16/9)/2;
         }
         else {
             x = canvas.width * .5;
@@ -107,8 +107,8 @@ function drawScreen() {
         else if(man_noselect.loaded) ctx.drawImage(man_noselect, xm, 0 + ym, x, y);
 
         //draw the sprite
-        if (character_select == 2 && woman_select.loaded) ctx.drawImage(woman_select, xm + xm, 0 + ym, x, y);
-        else if(woman_noselect.loaded) ctx.drawImage(woman_noselect, xm + xm, 0 + ym, x, y);
+        if (character_select == 2 && woman_select.loaded) ctx.drawImage(woman_select, x + xm, 0 + ym, x, y);
+        else if(woman_noselect.loaded) ctx.drawImage(woman_noselect, x + xm, 0 + ym, x, y);
 
     }
 }
