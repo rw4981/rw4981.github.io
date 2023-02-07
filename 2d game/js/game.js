@@ -56,7 +56,8 @@ function drawScreen() {
         //draw the intro graphics
         if (intro.loaded) ctx.drawImage(intro, 0, 0, canvas.width, canvas.height);
         if (!intro_wait) {
-            setTimeout(function () { game_state = 1; }, 1);
+            setTimeout(function () { game_state = 1;     resizeCanvas();
+}, 1);
             intro_wait = true;
         }
     }
@@ -115,42 +116,42 @@ function drawScreen() {
 //check if the sprite is loaded
 intro.onload = function () {
     intro.loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 man_select.onload = function () {
     man_select.loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 woman_select.onload = function () {
     woman_select.loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 man_sprite.onload = function () {
     man_sprite.loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 woman_sprite.onload = function () {
     woman_sprite.loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 tiles[0].onload = function () {
     tiles[0].loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 tiles[1].onload = function () {
     tiles[1].loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 tiles[2].onload = function () {
     tiles[2].loaded = true;
-    drawScreen();
+    resizeCanvas();
 }
 
 //get the context
@@ -180,13 +181,13 @@ function getMousePos(canvas, evt) {
 //add the mouse position listener
 canvas.addEventListener('mousemove', function (evt) {
     mousePos = getMousePos(canvas, evt);
-    drawScreen();
+    resizeCanvas();
 });
 
 //add the mouse click listener
 canvas.addEventListener('click', function (evt) {
     if (game_state == 1) {
         game_state = 2;
-        drawScreen();
+        resizeCanvas();
     }
 });
