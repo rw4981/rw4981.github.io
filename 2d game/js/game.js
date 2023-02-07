@@ -1,4 +1,4 @@
-game_state = 0;
+game_state = 1;
 intro_wait = false;
 character_select = 0;
 
@@ -52,17 +52,20 @@ function drawScreen() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (game_state == 0) {
+/*    if (game_state == 0) {
 
         //draw the intro graphics
         if (intro.loaded) ctx.drawImage(intro, 0, 0, canvas.width, canvas.height);
         if (!intro_wait) {
-            setTimeout(function () { game_state = 1; resizeCanvas(); });
-            intro_wait = true;
+            setTimeout(function () { 
+                resizeCanvas();
+                intro_wait = true;
+                game_state = 1; 
+            });
         }
     }
 
-    else if (game_state == 3) {
+    else*/ if (game_state == 3) {
 
         ctx.filter='none';
 
@@ -91,6 +94,7 @@ function drawScreen() {
             x = canvas.width * .5;
             y = canvas.width * 1;
             ym = (canvas.height - (x * 2)) * .5;
+            xm = 0;
         }
 
         //draw the sprite
