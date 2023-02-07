@@ -1,0 +1,16 @@
+//set the body style
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+//set the canvas style
+canvas {
+    display: block;
+    margin: 0 auto;
+}
