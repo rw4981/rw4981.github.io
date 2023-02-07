@@ -184,7 +184,12 @@ canvas.addEventListener('mousemove', function (evt) {
 //add the mouse click listener
 canvas.addEventListener('click', function (evt) {
 
-    if (game_state == 1) {
+    var answer = window.orientation > 1;
+    if (answer) {
+        character_select = 0;
+    }
+
+    else if (game_state == 1) {
 
         //check the mouse position
         if (mousePos.x > xm && mousePos.x < x + xm && mousePos.y > ym && mousePos.y < y + ym) {
