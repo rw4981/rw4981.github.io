@@ -12,6 +12,10 @@ man_select = new Image();
 man_select.src = "img/man_select.png";
 woman_select = new Image();
 woman_select.src = "img/woman_select.png";
+man_noselect = new Image();
+man_noselect.src = "img/man_noselect.png";
+woman_noselect = new Image();
+woman_noselect.src = "img/woman_noselect.png";
 
 //load sprites
 man_sprite = new Image();
@@ -99,14 +103,13 @@ function drawScreen() {
         }
 
         //draw the sprite
-        if (character_select == 1) ctx.filter = 'none';
-        else ctx.filter = 'grayscale(100%)';
-        if (man_select.loaded) ctx.drawImage(man_select, xm, 0 + ym, x, y);
+        if (character_select == 1 && man_select.loaded) ctx.drawImage(man_select, xm, 0 + ym, x, y);
+        else if(man_noselect.loaded) ctx.drawImage(man_noselect, xm, 0 + ym, x, y);
 
         //draw the sprite
-        if (character_select == 2) ctx.filter = 'none';
-        else ctx.filter = 'grayscale(100%)';
-        if (woman_select.loaded) ctx.drawImage(woman_select, x + xm, 0 + ym, x, y);
+        if (character_select == 2 && woman_select.loaded) ctx.drawImage(woman_select, xm + xm, 0 + ym, x, y);
+        else if(woman_noselect.loaded) ctx.drawImage(woman_noselect, xm + xm, 0 + ym, x, y);
+
     }
 }
 
@@ -123,6 +126,16 @@ man_select.onload = function () {
 
 woman_select.onload = function () {
     woman_select.loaded = true;
+    resizeCanvas();
+}
+
+man_noselect.onload = function () {
+    man_noselect.loaded = true;
+    resizeCanvas();
+}
+
+woman_noselect.onload = function () {
+    woman_noselect.loaded = true;
     resizeCanvas();
 }
 
