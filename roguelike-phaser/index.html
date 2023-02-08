@@ -12,24 +12,13 @@
 
         //create config
         config = {
-            width: window.innerWidth,
-            height: window.innerHeight,
+            width: 1680,
+            height: 900,
             type: Phaser.AUTO,
-            backgroundColor: '#ffffff',
-            scale: {
-                mode: Phaser.Scale.FIT
-            },
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+            backgroundColor: '#000',
             scene: { preload: preload, create: create, update: update }
         };
-
-        if (window.innerWidth > window.innerHeight) {
-            config.scale.width = '100%';
-            config.scale.height = window.innerHeight;
-        }
-        else {
-            config.scale.width = window.innerWidth;
-            config.scale.height = '100%';
-        }
 
         game = new Phaser.Game(config);
 
@@ -50,11 +39,43 @@
             tiles = tilemap.addTilesetImage('tileset1');
             layer = tilemap.createLayer(0, tiles, 0, 0);
 
-            sprite = this.add.sprite(config.width / 2, config.height / 2, 'boy');
-            sprite.setScale(.125, .125);
+            girl_sprite = this.add.sprite(config.width / 2, config.height * .78 / 2, 'girl');
+            girl_sprite.setScale(.125, .125);
+
+            boy_sprite = this.add.sprite(config.width / 2, config.height * .78 / 2, 'boy');
+            boy_sprite.setScale(.125, .125);
 
             frame = this.add.sprite(config.width / 2, config.height * .78, 'frame');
             frame.setScale(1, 1)
+
+            loadScreen = this.add.sprite(config.width / 2, config.height / 2, 'loadScreen');
+
+            girl_select = this.add.sprite(config.width * .3, config.height / 2, 'girl_select');
+            girl_select.setScale(.5,.5);
+//            girl_select.setName('girl_select');
+            girl_select.setInteractive();
+
+            boy_select = this.add.sprite(config.width * .7, config.height / 2, 'boy_select');
+            boy_select.setScale(.5,.5);
+//            boy_select.setName('boy_select');
+            boy_select.setInteractive();
+
+            game_state = 1;
+
+            this.input.on('pointerdown', function (pointer,objectsClicked) {
+                if (game_state == 1) game_state = 2;
+                else if (game_state == 2) {
+                    if(objectsClicked[0]==girl_select){
+                        character='girl';
+                        game_state=0;
+                    }
+                    else if(objectsClicked[0]==boy_select){
+                        character='boy';
+                        game_state=0;
+                    }
+                }
+            });
+
         }
 
         function preload() {
@@ -63,35 +84,45 @@
             this.load.image('boy', 'assets/sprites/boy.png');
             this.load.image('girl', 'assets/sprites/girl.png');
             this.load.image('frame', 'assets/sprites/frame.png');
+            this.load.image('loadScreen', 'assets/sprites/intro.jpg');
+            this.load.image('boy_select', 'assets/sprites/boy_select.png')
+            this.load.image('girl_select', 'assets/sprites/girl_select.png')
         }
 
-        function update() {
-        }
+        function update(time, delta) {
 
-        function onKeyUp(event) {
-            switch (event.keyCode) {
-                case Phaser.Keyboard.LEFT:
-                    break;
-                case Phaser.Keyboard.RIGHT:
-                    break;
-                case Phaser.Keyboard.UP:
-                    break;
-                case Phaser.Keyboard.DOWN:
-                    break;
+            if (game_state == 0) {
+
+                if(character=='boy') boy_sprite.visible = true;
+                else boy_sprite.visible = false;
+                if(character=='girl') girl_sprite.visible = true;
+                else girl_sprite.visible = false;
+                girl_sprite.visible = true;
+                layer.visible = true;
+                frame.visible = true;
+                loadScreen.visible = false;
+                girl_select.visible = false;
+                boy_select.visible = false;
             }
-        }
-
-        window.addEventListener('resize', function (event) {
-
-            if (window.innerWidth > window.innerHeight) {
-                config.scale.width = '100%';
-                config.scale.height = '0%';
+            else if (game_state == 1) {
+                boy_sprite.visible = false;
+                girl_sprite.visible = false;
+                layer.visible = false;
+                frame.visible = false;
+                loadScreen.visible = true;
+                girl_select.visible = false;
+                boy_select.visible = false;
             }
             else {
-                config.scale.width = '0%';
-                config.scale.height = '100%';
+                boy_sprite.visible = false;
+                girl_sprite.visible = false;
+                layer.visible = false;
+                frame.visible = false;
+                loadScreen.visible = false;
+                girl_select.visible = true;
+                boy_select.visible = true;
             }
-        }, false);
+        }
 
     </script>
 
