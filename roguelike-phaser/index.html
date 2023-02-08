@@ -15,6 +15,7 @@
             width: window.innerWidth * .9,
             type: Phaser.AUTO,
             autoCenter: Phaser.Scale.CENTER_BOTH,
+            scaleMode: Phaser.Scale.FIT,
             backgroundColor: '#000',
             scene: { preload: preload, create: create, update: update }
         };
@@ -31,20 +32,28 @@
                 map[i] = [];
                 for (var j = 0; j < config.width / 64; j++) {
                     chance = Math.random();
-                    if (chance > .15) map[i][j] = 36;
-                    else map[i][j] = 17;
+                    if (chance > .15) map[i][j] = 3;
+                    else map[i][j] = 8;
                 }
             }
 
             tilemap = this.make.tilemap({ data: map, tileWidth: 64, tileHeight: 64 });
             tiles = tilemap.addTilesetImage('tileset1');
             layer = tilemap.createLayer(0, tiles, 0, 0);
+            layer.setScale(1, 1);
+            layer.x += 38;
+            layer.y += 56;
 
-            girl_sprite = this.add.sprite(config.width / 2, config.height * .78 / 2, 'girl');
-            girl_sprite.setScale(.125, .125);
+            girl_sprite = this.add.sprite(config.width / 2, config.height / 2, 'girl');
+            girl_sprite.setScale(.0625, .0625);
+            girl_sprite.visible = false;
 
-            boy_sprite = this.add.sprite(config.width / 2, config.height * .78 / 2, 'boy');
-            boy_sprite.setScale(.125, .125);
+            boy_sprite = this.add.sprite(config.width / 2, config.height / 2, 'boy');
+            boy_sprite.setScale(.0625, .0625);
+            boy_sprite.visible = false;
+
+            sprite = boy_sprite;
+            sprite.visible = true;
 
             frame = this.add.sprite(config.width / 2, config.height * .78, 'frame');
             frame.setScale(1, 1)
@@ -52,27 +61,25 @@
             loadScreen = this.add.sprite(config.width / 2, config.height / 2, 'loadScreen');
 
             girl_select = this.add.sprite(config.width * .3, config.height / 2, 'girl_select');
-            girl_select.setScale(.5,.5);
-//            girl_select.setName('girl_select');
+            girl_select.setScale(.5, .5);
             girl_select.setInteractive();
 
             boy_select = this.add.sprite(config.width * .7, config.height / 2, 'boy_select');
-            boy_select.setScale(.5,.5);
-//            boy_select.setName('boy_select');
+            boy_select.setScale(.5, .5);
             boy_select.setInteractive();
 
             game_state = 1;
 
-            this.input.on('pointerdown', function (pointer,objectsClicked) {
+            this.input.on('pointerdown', function (pointer, objectsClicked) {
                 if (game_state == 1) game_state = 2;
                 else if (game_state == 2) {
-                    if(objectsClicked[0]==girl_select){
-                        character='girl';
-                        game_state=0;
+                    if (objectsClicked[0] === girl_select) {
+                        character = 'girl';
+                        game_state = 0;
                     }
-                    else if(objectsClicked[0]==boy_select){
-                        character='boy';
-                        game_state=0;
+                    else if (objectsClicked[0] === boy_select) {
+                        character = 'boy';
+                        game_state = 0;
                     }
                 }
             });
@@ -86,28 +93,23 @@
             this.load.image('girl', 'assets/sprites/girl.png');
             this.load.image('frame', 'assets/sprites/frame.png');
             this.load.image('loadScreen', 'assets/sprites/intro.jpg');
-            this.load.image('boy_select', 'assets/sprites/boy_select.png')
-            this.load.image('girl_select', 'assets/sprites/girl_select.png')
+            this.load.image('boy_select', 'assets/sprites/boy_select.png');
+            this.load.image('girl_select', 'assets/sprites/girl_select.png');
         }
 
         function update(time, delta) {
 
             if (game_state == 0) {
 
-                if(character=='boy') boy_sprite.visible = true;
-                else boy_sprite.visible = false;
-                if(character=='girl') girl_sprite.visible = true;
-                else girl_sprite.visible = false;
-                girl_sprite.visible = true;
+                sprite.visible = true;
                 layer.visible = true;
-                frame.visible = true;
+                frame.visible = false;
                 loadScreen.visible = false;
                 girl_select.visible = false;
                 boy_select.visible = false;
             }
             else if (game_state == 1) {
-                boy_sprite.visible = false;
-                girl_sprite.visible = false;
+                sprite.visible = false;
                 layer.visible = false;
                 frame.visible = false;
                 loadScreen.visible = true;
@@ -115,8 +117,7 @@
                 boy_select.visible = false;
             }
             else {
-                boy_sprite.visible = false;
-                girl_sprite.visible = false;
+                sprite.visible = false;
                 layer.visible = false;
                 frame.visible = false;
                 loadScreen.visible = false;
