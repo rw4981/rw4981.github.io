@@ -12,13 +12,14 @@
 
         //create config
         config = {
-            width: 1680,
-            height: 900,
+            width: window.innerWidth * .9,
             type: Phaser.AUTO,
             autoCenter: Phaser.Scale.CENTER_BOTH,
             backgroundColor: '#000',
             scene: { preload: preload, create: create, update: update }
         };
+
+        config.height = config.width * 9 / 16;
 
         game = new Phaser.Game(config);
 
