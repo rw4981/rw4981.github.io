@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Roguelike-Phaser v1</title>
+</head>
+
+<body>
+
+    <script src="phaser.min.js"></script>
+    <script>
+
+        //create config
+        config = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            type: Phaser.AUTO,
+            backgroundColor: '#ffffff',
+            scale: {
+                mode: Phaser.Scale.FIT
+            },
+            scene: { preload: preload, create: create, update: update }
+        };
+
+        if (window.innerWidth > window.innerHeight) {
+            config.scale.width = '100%';
+            config.scale.height = window.innerHeight;
+        }
+        else {
+            config.scale.width = window.innerWidth;
+            config.scale.height = '100%';
+        }
+
+        game = new Phaser.Game(config);
+
+        function create() {
+
+            //generate map
+            map = [];
+            for (var i = 0; i < config.height / 64; i++) {
+                map[i] = [];
+                for (var j = 0; j < config.width / 64; j++) {
+                    chance = Math.random();
+                    if (chance > .15) map[i][j] = 36;
+                    else map[i][j] = 17;
+                }
+            }
+
+            tilemap = this.make.tilemap({ data: map, tileWidth: 64, tileHeight: 64 });
+            tiles = tilemap.addTilesetImage('tileset1');
+            layer = tilemap.createLayer(0, tiles, 0, 0);
+
+            sprite = this.add.sprite(config.width / 2, config.height / 2, 'boy');
+            sprite.setScale(.125, .125);
+
+            frame = this.add.sprite(config.width / 2, config.height * .78, 'frame');
+            frame.setScale(1, 1)
+        }
+
+        function preload() {
+
+            this.load.image('tileset1', 'assets/sprites/tileset.png');
+            this.load.image('boy', 'assets/sprites/boy.png');
+            this.load.image('girl', 'assets/sprites/girl.png');
+            this.load.image('frame', 'assets/sprites/frame.png');
+        }
+
+        function update() {
+        }
+
+        function onKeyUp(event) {
+            switch (event.keyCode) {
+                case Phaser.Keyboard.LEFT:
+                    break;
+                case Phaser.Keyboard.RIGHT:
+                    break;
+                case Phaser.Keyboard.UP:
+                    break;
+                case Phaser.Keyboard.DOWN:
+                    break;
+            }
+        }
+
+        window.addEventListener('resize', function (event) {
+
+            if (window.innerWidth > window.innerHeight) {
+                config.scale.width = '100%';
+                config.scale.height = '0%';
+            }
+            else {
+                config.scale.width = '0%';
+                config.scale.height = '100%';
+            }
+        }, false);
+
+    </script>
+
+</body>
+
+</html>
